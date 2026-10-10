@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Use secret
         env:
-          API_KEY: ${{ secrets.DEMO_API_KEYY }}
+          API_KEY: ${{ secrets.DEMO_API_KEY }}
 
         run: |
           if [ -n "$API_KEY" ]; then
