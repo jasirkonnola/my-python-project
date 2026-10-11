@@ -46,7 +46,7 @@ jobs:
           cache-dependency-path: requirements.txt
           
       - name: Install dependencies
-        run: pyton -m pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt
 
       - name: Run unit tests
         run: python -m unittest
