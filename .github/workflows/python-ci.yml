@@ -24,12 +24,11 @@ jobs:
       - name: Get repository code
         uses: actions/checkout@v4
 
-      - name: Set up Python with pip cache
+      # Removed cache from here because check doesn't run pip install
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-          cache-dependency-path: requirements.txt
           
       - name: Check Python syntax
         run: python -m py_compile app.py
@@ -48,6 +47,7 @@ jobs:
       - name: Get repository code
         uses: actions/checkout@v4
 
+      # Caching is kept here because pip install runs in this job
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -85,6 +85,5 @@ jobs:
             echo "Secret is available"
           else
             echo "Secret is missing (Skipping demo)"
-            # Exit 0 so it doesn't fail your pipeline if the secret isn't configured yet
             exit 0
           fi
