@@ -36,9 +36,14 @@ jobs:
         run: python -m py_compile app.py
 
   test:
-    name: Run Python tests
+    name: Run Python tests (${{ matrix.os }} / Python ${{ matrix.python-version }})
     needs: check
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
 
     steps:
       - name: Get repository code
@@ -47,7 +52,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: requirements.txt
           
@@ -63,7 +68,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: python-test-report
+          name: python-test-report-${{ matrix.os }}-py${{ matrix.python-version }}
           path: test-report.txt
           if-no-files-found: warn
           retention-days: 7
