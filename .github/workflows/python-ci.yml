@@ -33,6 +33,10 @@ jobs:
       - name: Check Python syntax
         run: python -m py_compile app.py
 
+      - name: Report syntax failure
+        if: failure()
+        run: echo "Syntax check failed on Python ${{ matrix.python-version }}"
+
   test:
     name: Run Python tests (${{ matrix.os }} / Python ${{ matrix.python-version }})
     needs: check
@@ -64,6 +68,18 @@ jobs:
           python -m unittest -v 2>&1 | tee test-report.txt
           test "${PIPESTATUS[0]}" -eq 0
 
+      - name: Tests passed message
+        if: success()
+        shell: bash
+        run: echo "All tests passed on ${{ matrix.os }} / Python ${{ matrix.python-version }}"
+
+      - name: Show report on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "Test failed. Printing report:"
+          cat test-report.txt || echo "No report was created"
+
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,17 +89,32 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-  secret-demo:
+      - name: Finish message
+        if: always()
+        shell: bash
+        run: echo "Test job finished."
+
+  deploy:
+    name: Deploy (demo)
+    needs: [check, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
+      - name: Deploy message
+        run: echo "Deploying from main..."
+        
+  secret-demo:
+    name: Secret demo
+    runs-on: ubuntu-latest
+    env:
+      API_KEY: ${{ secrets.DEMO_API_KEY }}
+      
+    steps:
       - name: Use secret
-        env:
-          API_KEY: ${{ secrets.DEMO_API_KEY }}
-        run: |
-          if [ -n "$API_KEY" ]; then
-            echo "Secret is available"
-          else
-            echo "Secret is missing (Skipping demo)"
-            exit 0
-          fi
+        if: env.API_KEY != ''
+        run: echo "Secret is available"
+
+      - name: Secret missing
+        if: env.API_KEY == ''
+        run: echo "Secret is missing (skipping demo)"
