@@ -1,0 +1,32 @@
+name: Python CI and Deployment Demo
+
+on: 
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run test
+        run: python -m unittest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Simulate deployment
+        run: echo "Deployment Successful!"
